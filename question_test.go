@@ -45,12 +45,18 @@ func TestNewQuestionNonPositiveNumber(t *testing.T) {
 	}
 }
 
-func TestAddNewAnswer(t *testing.T) {
-	number, description := uint16(1), "How many edges are there in a square?"
-	answers := make([]Answer, 0, 4)
-	question := newQuestionOrFatal(t, number, description, &answers)
+func newQuestion(number uint16, description string) *Question {
+	return &Question{number, description, make([]Answer, 0, 4)}
+}
 
-	if err := question.AddNewAnswer("3", false); err != nil {
+func TestAddNewAnswer(t *testing.T) {
+	question := newQuestion(uint16(1), "How many edges are there in a square?")
+	err := question.AddNewAnswer("", true)
+
+	if err == nil {
+		t.Errorf("expected empty answer error but nothing raised")
+	}
+	if err = question.AddNewAnswer("3", false); err != nil {
 		t.Errorf("expected no error but returned an error")
 	}
 	if question.AnswerSize() != 1 {
