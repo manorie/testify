@@ -42,6 +42,13 @@ func TestNewQuestionNonPositiveNumber(t *testing.T) {
 	}
 }
 
+func TestNewAnswerEmptyDescription(t *testing.T) {
+	_, err := NewAnswer("", false)
+	if err == nil {
+		t.Errorf("expected %v error, got %v", fmt.Errorf("empty description"))
+	}
+}
+
 func newQuestion(number uint16, description string) *Question {
 	answers, photos := make([]Answer, 0, 4), make([]Photo, 0, 1)
 	return &Question{number, description, answers, photos}
