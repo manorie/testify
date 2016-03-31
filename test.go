@@ -21,44 +21,31 @@ type Test struct {
 	ExpirationDate int64
 }
 
-func (t *Test) AddAuthor(name string) (*Test, error) {
-	if err := validateStringLength(name); err != nil {
-		return nil, err
-	}
-	t.Author = name
-	return t, nil
+func (t *Test) AddAuthor(author string) error {
+	return t.setString(&t.Author, author)
 }
 
-func (t *Test) AddTitle(title string) (*Test, error) {
-	if err := validateStringLength(title); err != nil {
-		return nil, err
+func (t *Test) setString(p *string, v string) error {
+	if len(v) > 255 {
+		return fmt.Errorf("field %s is too long.", v)
 	}
-	t.Title = title
-	return t, nil
-}
-
-func validateStringLength(field string) error {
-	if len(field) > 255 {
-		return fmt.Errorf("field %v is too long.", field)
-	}
+	*p = v
 	return nil
 }
 
 func CreateNewTest() (*Test, error) {
-	path, _ := constructAUniqueKey()
-	secretKey, _ := constructAUniqueKey()
-
 	return &Test{
-		Path:         path,
-		SecretKey:    secretKey,
+		Path:         constructAUniqueKey(),
+		SecretKey:    constructAUniqueKey(),
 		IsPublished:  false,
 		CreationDate: time.Now().Unix(),
 	}, nil
 }
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz-_~")
+var tempRune = make([]rune, 20, 20)
 
-func constructAUniqueKey() (string, error) {
+func constructAUniqueKey() string {
 	now := strconv.FormatInt(time.Now().Unix(), 10)
 	t := []rune(now)
 	x := make([]rune, 20, 20)
@@ -70,5 +57,5 @@ func constructAUniqueKey() (string, error) {
 		x = append(x, letterRunes[r1.Intn(len(letterRunes))])
 		x = append(x, r)
 	}
-	return string(x), nil
+	return string(x)
 }
