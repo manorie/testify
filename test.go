@@ -1,6 +1,7 @@
 package testify
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -18,6 +19,29 @@ type Test struct {
 	AnswerSize     uint8
 	CreationDate   int64
 	ExpirationDate int64
+}
+
+func (t *Test) AddAuthor(name string) (*Test, error) {
+	if err := validateStringLength(name); err != nil {
+		return nil, err
+	}
+	t.Author = name
+	return t, nil
+}
+
+func (t *Test) AddTitle(title string) (*Test, error) {
+	if err := validateStringLength(title); err != nil {
+		return nil, err
+	}
+	t.Title = title
+	return t, nil
+}
+
+func validateStringLength(field string) error {
+	if len(field) > 255 {
+		return fmt.Errorf("field %v is too long.", field)
+	}
+	return nil
 }
 
 func CreateNewTest() (*Test, error) {

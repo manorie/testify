@@ -69,6 +69,21 @@ func TestAddNewAnswer(t *testing.T) {
 	}
 }
 
+func TestRemoveAnswers(t *testing.T) {
+	question := newQuestion(uint16(1), "How many edges are there in a rectangle?")
+	question.AddNewAnswer("4", true)
+	question.AddNewAnswer("2", false)
+
+	if question.AnswerSize() != 2 {
+		t.Errorf("unexpected question answer size")
+	}
+	question.RemoveAnswers()
+
+	if question.AnswerSize() != 0 {
+		t.Errorf("expected RemoveAnswers to remove but did not")
+	}
+}
+
 func TestAddNewQuestionPhoto(t *testing.T) {
 	question := newQuestion(uint16(1), "How many edges are there in a triangle?")
 	err := question.AddNewQuestionPhoto("")

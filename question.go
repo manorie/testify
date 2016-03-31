@@ -52,6 +52,10 @@ func (q *Question) AddNewAnswer(description string, isCorrect bool) error {
 	return nil
 }
 
+func (q *Question) RemoveAnswers() {
+	q.answers = nil
+}
+
 //adding photos has to be url-safe
 func (q *Question) AddNewQuestionPhoto(link string) error {
 	if link == "" {
