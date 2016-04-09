@@ -1,7 +1,9 @@
 package testify
 
 import (
+	"database/sql"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"math/rand"
 	"strconv"
 	"time"
@@ -19,6 +21,75 @@ type Test struct {
 	AnswerSize     uint8
 	CreationDate   int64
 	ExpirationDate int64
+}
+
+func (t *Test) WriteTo(db *sql.DB) error {
+	stmt, err := db.Prepare(`INSERT INTO Tests(
+        Title, Author, Path, SecretKey, AuthorEmail,
+        IsPublished, TimeLimit, AnswerSize, CreationDate,
+        ExpirationDate) values(?,?,?,?,?,?,?,?,?,?)`)
+
+	if err != nil {
+		return err
+	}
+
+	res, err := stmt.Exec(&t.Title, &t.Author, &t.Path, &t.SecretKey,
+		&t.AuthorEmail, &t.IsPublished, &t.TimeLimit, &t.AnswerSize,
+		&t.CreationDate, &t.ExpirationDate)
+
+	if err != nil {
+		return err
+	}
+
+	id, err := res.LastInsertId()
+
+	if err != nil {
+		return err
+	}
+
+	return db.QueryRow("SELECT * FROM Tests WHERE Id = ?", id).Scan(&t.Id,
+		&t.Title, &t.Author, &t.Path, &t.SecretKey, &t.AuthorEmail, &t.IsPublished,
+		&t.TimeLimit, &t.AnswerSize, &t.CreationDate, &t.ExpirationDate)
+}
+
+func FindTestById(db *sql.DB, id int) (Test, error) {
+	var t Test
+	err := db.QueryRow("SELECT * FROM Tests WHERE Id = ?", id).Scan(&t.Id,
+		&t.Title, &t.Author, &t.Path, &t.SecretKey, &t.AuthorEmail, &t.IsPublished,
+		&t.TimeLimit, &t.AnswerSize, &t.CreationDate, &t.ExpirationDate)
+
+	return t, err
+}
+
+func OpenDb() (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", "./db/testifyDb.db")
+	if err != nil {
+		panic(err)
+	}
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS Tests (
+            Id              integer PRIMARY KEY AUTOINCREMENT,
+            Title           varchar(255),
+            Author          varchar(255),
+            Path            varchar(255) NOT NULL,
+            SecretKey       varchar(255) NOT NULL,
+            AuthorEmail     varchar(255) NOT NULL,
+            IsPublished     boolean,
+            TimeLimit       integer NOT NULL,
+            AnswerSize      integer NOT NULL,
+            CreationDate    integer NOT NULL,
+            ExpirationDate  integer NOT NULL)`)
+
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS TestPathsIndex
+            ON Tests(path)`)
+
+	if err != nil {
+		panic(err)
+	}
+	return db, err
 }
 
 func (t *Test) AddTitle(title string) error {
