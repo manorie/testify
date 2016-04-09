@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/manorie/testify/components/test"
 	_ "github.com/mattn/go-sqlite3"
+	"os"
 )
 
 type Connection struct {
@@ -11,8 +12,15 @@ type Connection struct {
 	err error
 }
 
+func dbPath() string {
+	if os.Getenv("testifyMode") == "production" {
+		return "./productionDb.db"
+	}
+	return "./testDb.db"
+}
+
 func NewConnection() (c Connection) {
-	c.db, c.err = sql.Open("sqlite3", "./testifyDb.db")
+	c.db, c.err = sql.Open("sqlite3", dbPath())
 
 	_, c.err = c.db.Exec(`CREATE TABLE IF NOT EXISTS Tests (
             Id              integer PRIMARY KEY AUTOINCREMENT,
