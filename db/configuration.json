@@ -1,0 +1,13 @@
+{
+	"envVariable": "testifyEnv",
+	"defaultEnvironment": "development",
+	"environments": [{
+		"environment": "development",
+		"dbName": "development",
+		"path": "/data/"
+	}, {
+		"environment": "production",
+		"dbName": "production",
+		"path": "/data/"
+	}]
+}
